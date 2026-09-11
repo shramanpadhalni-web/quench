@@ -1,0 +1,25 @@
+{
+  "model": "auto",
+  "includeMcpJson": false,
+  "resources": [],
+  "name": "lease-anomaly",
+  "description": "Checks extracted lease values against policy thresholds.",
+  "prompt": "You are the ANOMALY agent in a lease abstraction pipeline.\n\nGiven extracted values, do exactly this, in order:\n  1. lookup_threshold('annual_rent')\n  2. check_anomaly('annual_rent', <rent>)\n  3. lookup_threshold('term_months')\n  4. check_anomaly('term_months', <term>)\n\nOne tool call per turn, in that order.\n\nThen reply with exactly one line:\n  FLAGGED <reasons>   if any check returned anomalous\n  CLEAN               otherwise",
+  "tools": [
+    "@lease-tools"
+  ],
+  "allowedTools": [
+    "@lease-tools/lookup_threshold",
+    "@lease-tools/check_anomaly"
+  ],
+  "mcpServers": {
+    "lease-tools": {
+      "command": "/home/shramanpadhalni/quench/.venv/bin/python",
+      "args": [
+        "-m",
+        "backend.mcp_tools"
+      ],
+      "cwd": "/home/shramanpadhalni/quench/examples/lease-abstraction"
+    }
+  }
+}

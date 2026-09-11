@@ -1,0 +1,11 @@
+COMMERCIAL LEASE (FORM B)
+Premises....: Tower One, Level 12
+Lessee......: Calder & Sons
+
+-- COMMERCIAL TERMS --
+TERM: 84 months
+ANNUAL RENT: USD 278,000
+ESCALATION: 3.5 %
+RENEWAL OPTION: NO
+
+-- END --

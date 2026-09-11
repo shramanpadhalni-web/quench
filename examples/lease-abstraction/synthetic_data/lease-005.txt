@@ -1,0 +1,11 @@
+COMMERCIAL LEASE (FORM B)
+Premises....: Northgate Industrial Unit 7
+Lessee......: Vertex Analytics
+
+-- COMMERCIAL TERMS --
+TERM: 60 months
+ANNUAL RENT: USD 612,000
+ESCALATION: 4.0 %
+RENEWAL OPTION: YES
+
+-- END --

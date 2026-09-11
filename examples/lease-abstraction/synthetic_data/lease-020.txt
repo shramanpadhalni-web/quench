@@ -1,0 +1,11 @@
+COMMERCIAL LEASE (FORM B)
+Premises....: Harbour Point Retail 3
+Lessee......: Calder & Sons
+
+-- COMMERCIAL TERMS --
+TERM: 36 months
+ANNUAL RENT: USD 360,000
+ESCALATION: 2.5 %
+RENEWAL OPTION: YES
+
+-- END --

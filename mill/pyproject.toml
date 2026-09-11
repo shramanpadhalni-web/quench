@@ -1,0 +1,13 @@
+[project]
+name = "quench-mill"
+version = "0.1.0"
+description = "Executor - runs a sealed Cast with no model in the loop"
+requires-python = ">=3.10"
+dependencies = []
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

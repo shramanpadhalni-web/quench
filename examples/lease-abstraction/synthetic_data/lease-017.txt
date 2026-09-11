@@ -1,0 +1,11 @@
+COMMERCIAL LEASE (FORM B)
+Premises....: Riverside Park B
+Lessee......: Northwind Retail
+
+-- COMMERCIAL TERMS --
+TERM: 120 months
+ANNUAL RENT: USD 253,000
+ESCALATION: 2.5 %
+RENEWAL OPTION: NO
+
+-- END --

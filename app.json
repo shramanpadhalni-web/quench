@@ -1,0 +1,65 @@
+{
+  "name": "quench",
+  "displayName": "Quench",
+  "description": "Compiles repeated, verified-deterministic skills into signed, zero-token executable artifacts.",
+  "version": "0.1.0",
+  "author": "Quench contributors",
+  "license": "Apache-2.0",
+  "minCrewVersion": "0.5.0",
+  "tags": [
+    "determinism",
+    "compiler",
+    "cost-optimization",
+    "audit"
+  ],
+  "agents": [
+    "agents/quench-observer.json"
+  ],
+  "skills": [
+    "skills/promote-to-ingot.md",
+    "skills/inspect-ingot.md"
+  ],
+  "backend": {
+    "entryPoint": "backend/main.py",
+    "type": "python",
+    "port": "auto",
+    "healthCheck": "/health"
+  },
+  "ui": {
+    "entry": "dist/index.mjs",
+    "pages": [
+      {
+        "route": "/apps/quench",
+        "label": "Quench",
+        "icon": "Layers"
+      }
+    ]
+  },
+  "permissions": {
+    "api": [
+      "/api/status",
+      "/api/agents",
+      "/api/crons",
+      "/api/sessions"
+    ],
+    "events": [
+      "tool_call",
+      "chat_done",
+      "notification"
+    ],
+    "mcpTools": [],
+    "storage": true,
+    "cron": true,
+    "memory": "app-scoped",
+    "network": false
+  },
+  "dependencies": {
+    "managedBy": "gateway",
+    "commands": [
+      "python3"
+    ]
+  },
+  "setup": {
+    "onInstall": "./scripts/install_hooks.sh"
+  }
+}

@@ -1,0 +1,11 @@
+COMMERCIAL LEASE (FORM B)
+Premises....: Anomaly Test Site 2
+Lessee......: Test Tenant Ltd
+
+-- COMMERCIAL TERMS --
+TERM: 6 months
+ANNUAL RENT: USD 7,200,000
+ESCALATION: 9.5 %
+RENEWAL OPTION: NO
+
+-- END --

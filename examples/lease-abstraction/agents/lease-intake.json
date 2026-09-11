@@ -1,0 +1,24 @@
+{
+  "model": "auto",
+  "includeMcpJson": false,
+  "resources": [],
+  "name": "lease-intake",
+  "description": "Validates a lease document is readable and identifies its template family.",
+  "prompt": "You are the INTAKE agent in a lease abstraction pipeline.\n\nGiven a document id, call read_lease once. Then reply with exactly one line:\n  OK <document_id> <template_family>\nwhere template_family is alpha if the text starts with 'MASTER LEASE', beta if it starts with 'COMMERCIAL LEASE', gamma if it starts with 'LEASE SCHEDULE'.\n\nCall no other tool. Do not summarise the lease. Do not explain.",
+  "tools": [
+    "@lease-tools"
+  ],
+  "allowedTools": [
+    "@lease-tools/read_lease"
+  ],
+  "mcpServers": {
+    "lease-tools": {
+      "command": "/home/shramanpadhalni/quench/.venv/bin/python",
+      "args": [
+        "-m",
+        "backend.mcp_tools"
+      ],
+      "cwd": "/home/shramanpadhalni/quench/examples/lease-abstraction"
+    }
+  }
+}

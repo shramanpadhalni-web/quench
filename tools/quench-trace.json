@@ -1,0 +1,35 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "quench-trace-posttooluse",
+      "trigger": "PostToolUse",
+      "action": {
+        "type": "command",
+        "command": "/home/shramanpadhalni/quench/tools/trace_capture.sh"
+      },
+      "enabled": true,
+      "timeout": 10
+    },
+    {
+      "name": "quench-trace-pretooluse",
+      "trigger": "PreToolUse",
+      "action": {
+        "type": "command",
+        "command": "/home/shramanpadhalni/quench/tools/trace_capture.sh"
+      },
+      "enabled": true,
+      "timeout": 10
+    },
+    {
+      "name": "quench-trace-userpromptsubmit",
+      "trigger": "UserPromptSubmit",
+      "action": {
+        "type": "command",
+        "command": "/home/shramanpadhalni/quench/tools/trace_capture.sh"
+      },
+      "enabled": true,
+      "timeout": 10
+    }
+  ]
+}

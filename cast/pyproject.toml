@@ -1,0 +1,13 @@
+[project]
+name = "quench-cast"
+version = "0.1.0"
+description = "Cast compiler - builds a typed IR from an agent's execution traces"
+requires-python = ">=3.10"
+dependencies = []
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

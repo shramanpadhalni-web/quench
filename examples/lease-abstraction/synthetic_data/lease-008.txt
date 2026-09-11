@@ -1,0 +1,11 @@
+COMMERCIAL LEASE (FORM B)
+Premises....: Riverside Park B
+Lessee......: Orion Manufacturing
+
+-- COMMERCIAL TERMS --
+TERM: 60 months
+ANNUAL RENT: USD 743,000
+ESCALATION: 5.0 %
+RENEWAL OPTION: YES
+
+-- END --

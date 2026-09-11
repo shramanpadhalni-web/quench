@@ -1,0 +1,61 @@
+{
+  "name": "lease-abstraction",
+  "displayName": "Lease Abstraction",
+  "description": "A multi-agent lease abstraction pipeline - and the reference demonstration of Quench sealing a real workflow.",
+  "version": "0.1.0",
+  "author": "Quench contributors",
+  "license": "Apache-2.0",
+  "minCrewVersion": "0.5.0",
+  "tags": [
+    "documents",
+    "extraction",
+    "real-estate",
+    "quench"
+  ],
+  "agents": [
+    "agents/lease-supervisor.json",
+    "agents/lease-intake.json",
+    "agents/lease-extractor.json",
+    "agents/lease-anomaly.json"
+  ],
+  "skills": [
+    "skills/abstract-lease.md"
+  ],
+  "backend": {
+    "entryPoint": "backend/main.py",
+    "type": "python",
+    "port": "auto",
+    "healthCheck": "/health"
+  },
+  "ui": {
+    "entry": "ui/dist/index.mjs",
+    "pages": [
+      {
+        "route": "/apps/lease-abstraction",
+        "label": "Lease Abstraction",
+        "icon": "FileText"
+      }
+    ]
+  },
+  "permissions": {
+    "api": [
+      "/api/status",
+      "/api/agents",
+      "/api/sessions"
+    ],
+    "events": [
+      "tool_call",
+      "chat_done",
+      "subagent_done",
+      "notification"
+    ],
+    "storage": true,
+    "network": false
+  },
+  "dependencies": {
+    "managedBy": "gateway",
+    "commands": [
+      "python3"
+    ]
+  }
+}

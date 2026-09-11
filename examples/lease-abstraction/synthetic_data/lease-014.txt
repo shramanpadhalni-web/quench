@@ -1,0 +1,11 @@
+COMMERCIAL LEASE (FORM B)
+Premises....: Northgate Industrial Unit 7
+Lessee......: Orion Manufacturing
+
+-- COMMERCIAL TERMS --
+TERM: 120 months
+ANNUAL RENT: USD 801,000
+ESCALATION: 3.5 %
+RENEWAL OPTION: NO
+
+-- END --

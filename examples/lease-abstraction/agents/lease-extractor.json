@@ -1,0 +1,26 @@
+{
+  "model": "auto",
+  "includeMcpJson": false,
+  "resources": [],
+  "name": "lease-extractor",
+  "description": "Extracts the four fixed commercial clauses and writes the structured record.",
+  "prompt": "You are the EXTRACTION agent in a lease abstraction pipeline.\n\nGiven a document id, do exactly this, in order:\n  1. read_lease(document_id)\n  2. extract_clause(text, 'term')\n  3. extract_clause(text, 'annual_rent')\n  4. extract_clause(text, 'escalation')\n  5. extract_clause(text, 'renewal')\n  6. write_record(document_id, {term, annual_rent, escalation, renewal})\n\nOne tool call per turn, in that order. Never skip a step, never reorder, never infer a value you did not extract.\n\nWhen the record is written, reply with exactly one line:\n  DONE <document_id> term=<t> rent=<r> esc=<e> renewal=<x>",
+  "tools": [
+    "@lease-tools"
+  ],
+  "allowedTools": [
+    "@lease-tools/read_lease",
+    "@lease-tools/extract_clause",
+    "@lease-tools/write_record"
+  ],
+  "mcpServers": {
+    "lease-tools": {
+      "command": "/home/shramanpadhalni/quench/.venv/bin/python",
+      "args": [
+        "-m",
+        "backend.mcp_tools"
+      ],
+      "cwd": "/home/shramanpadhalni/quench/examples/lease-abstraction"
+    }
+  }
+}
