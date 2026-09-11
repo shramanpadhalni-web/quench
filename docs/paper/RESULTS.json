@@ -1,0 +1,54 @@
+{
+  "traces": 116,
+  "workflows_analysed": 3,
+  "h1": {
+    "impure": 9,
+    "stable": 11,
+    "rate": 0.8181818181818182,
+    "ci95": [
+      0.5230138624217553,
+      0.9486333993289995
+    ],
+    "predicted": 0.2
+  },
+  "h2": {
+    "tp": 0,
+    "fp": 0,
+    "tn": 2,
+    "fn": 9,
+    "precision": 0.0,
+    "recall": 0.0
+  },
+  "h3": {
+    "wrongly_promoted": 9
+  },
+  "per_workflow": [
+    {
+      "workflow": "read_lease -> extract_clause -> extract_clause -> extract_clause -> extract_clause -> write_record",
+      "traces": 52,
+      "steps": 6,
+      "control_flow_stable": 6,
+      "impure": 6,
+      "impurity_rate": 1.0,
+      "baseline_promotes": true
+    },
+    {
+      "workflow": "read_lease",
+      "traces": 31,
+      "steps": 1,
+      "control_flow_stable": 1,
+      "impure": 1,
+      "impurity_rate": 1.0,
+      "baseline_promotes": true
+    },
+    {
+      "workflow": "lookup_threshold -> check_anomaly -> lookup_threshold -> check_anomaly",
+      "traces": 31,
+      "steps": 4,
+      "control_flow_stable": 4,
+      "impure": 2,
+      "impurity_rate": 0.5,
+      "baseline_promotes": true
+    }
+  ]
+}
