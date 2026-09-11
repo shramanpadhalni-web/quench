@@ -7,9 +7,15 @@ actually deterministic, and compiles it into a signed artifact that runs without
 a model. When the world stops matching what was sealed, it falls back to the
 live agent automatically.
 
-> Every comparable tool makes deterministic execution something you **author**.
-> Quench makes it something you **earn** — verified against your agent's own
-> recorded behavior, never designed in advance.
+> Most of this category makes deterministic execution something you **author**.
+> Quench makes it something you **earn** — and turns the result into a portable,
+> signed, policy-verified artifact, which nothing else in the field produces.
+
+Observation-first promotion is *not* ours alone — Microsoft's Progressive
+Crystallization and the LOOP Skill Engine both do it. See
+[`docs/COMPETITIVE-LANDSCAPE.md`](docs/COMPETITIVE-LANDSCAPE.md) before making
+any public claim. The artifact format, the compile-time policy gate, and
+output-purity verification are the parts that are ours.
 
 Status: **pre-v1, in active build.** See [`docs/adr/0000-crew-seam-verification.md`](docs/adr/0000-crew-seam-verification.md)
 for what is proven and what is still assumed.

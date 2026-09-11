@@ -29,11 +29,15 @@ for what we verified against a live install see [`adr/0000-crew-seam-verificatio
 
 ## 1. The one-sentence version
 
-> **Every other tool makes deterministic execution something you *author*.
-> Quench makes it something you *earn* — verified against your agent's own
-> recorded behaviour, never designed in advance.**
+> **Most of this category makes deterministic execution something you
+> *author*. Quench makes it something you *earn* — and turns the result into
+> a portable, signed, policy-verified artifact.**
 
-That sentence is the whole product. Everything below explains why it matters.
+Two recent systems also observe rather than author — Microsoft's Progressive
+Crystallization and the LOOP Skill Engine. Neither produces a transferable
+artifact, neither checks output purity, and both are welded to a single
+runtime. See [`COMPETITIVE-LANDSCAPE.md`](COMPETITIVE-LANDSCAPE.md) before
+presenting any of this.
 
 ---
 
@@ -111,18 +115,47 @@ the work that *stopped* being judgment-heavy and nobody noticed.
 
 ---
 
-## 4. Why nothing else solves this
+## 4. Where this sits in a real field
 
-Deterministic agent execution is an active field. Several good tools exist. None
-of them do what Quench does, and the distinction is precise.
+Deterministic agent execution is an active field and moving fast. Be precise
+about who does what — a vague answer here loses technical audiences, and a
+wrong one loses them permanently. Full survey:
+[`COMPETITIVE-LANDSCAPE.md`](COMPETITIVE-LANDSCAPE.md).
+
+### The authored camp — you write the deterministic spec
 
 | Tool | What it does | Why it isn't Quench |
 |---|---|---|
-| **Lobster** (OpenClaw) | Typed, local-first pipeline runtime. You hand-write a `.lobster` YAML with steps and approval gates. Deterministic because a human wrote a deterministic spec. | Requires you to already know the workflow shape and write it down. |
-| **duckflux / dot-agent** | Declarative DSLs for defining agent workflows up front. | Same distinction: specification-first, not observation-first. |
-| **a1-compiler** | Compiles an agent definition into optimised AOT/JIT code, replacing LLM calls where a cost function allows. Conceptually the closest sibling. | Operates at the framework level — a general agent-compiler you build *with*. Not a plugin into an already-deployed workspace's audit trail. |
+| **Lobster** (OpenClaw) | Typed pipeline runtime. You hand-write a `.lobster` YAML with steps and approval gates. Deterministic because a human wrote a deterministic spec. | Requires you to already know the workflow shape and write it down. |
+| **duckflux / dot-agent** | Declarative DSLs for defining agent workflows up front. | Specification-first, not observation-first. |
+| **Conductor** (Microsoft) | Multi-agent workflows in YAML; deterministic routing, zero-token orchestration layer. | Same — authored. |
 
-Every one of them is excellent at *"here's the workflow I already know I want."*
+Each is excellent at *"here's the workflow I already know I want."*
+
+### The generated camp — an LLM writes the code once
+
+| Tool | What it does | Why it isn't Quench |
+|---|---|---|
+| **Compiled AI** (XY.AI Labs) | LLM generates narrow business logic inside pre-validated templates; deploys as static code. 96% task completion, zero execution tokens, 57× token reduction. | Generation-first. The model is asked to write the workflow, not observed performing it. |
+
+### The observed camp — behaviour is watched, then promoted on evidence
+
+**This is our camp, and it is not empty.** Say so first, before anyone else does.
+
+| System | What it does | Where Quench differs |
+|---|---|---|
+| **Progressive Crystallization** (Microsoft Azure Networking, [arXiv 2607.07052](https://arxiv.org/abs/2607.07052)) | Extracts successful behaviour from traces, promotes on evidence (≥10 runs, ≥90% identical action sequence, zero safety violations), demotes automatically on drift. **>70% cost reduction in production; 0→45% deterministic over eight months.** | Internal Azure infrastructure for one domain. No portable artifact, no signing or provenance, no cross-runtime capture. Its promotion test checks *control flow only* — see §8. |
+| **LOOP Skill Engine** ([arXiv 2605.14237](https://arxiv.org/abs/2605.14237)) | Records a tool trajectory on first run, extracts a parameterised branch-free template, replays with the LLM bypassed. **93.3–99.98% token reduction, 8.7× faster.** | **One-shot** — record once, replay thereafter. Quench requires convergence across N traces, a purity check, and a Shadow Mode record against the live agent. One-shot cannot distinguish a stable workflow from one you happened to see once. |
+
+### The honest framing
+
+Someone has already proven this works in production, at scale, with numbers
+better than any we can currently show. **That is an asset.** It means the
+category is validated and the argument shifts from *"will this work?"* to
+*"whose implementation do you want?"*
+
+Ours is the one that produces a **portable, signed, policy-verified artifact**
+any runtime can create and any team can inspect, revoke or share.
 
 ```mermaid
 graph TB
@@ -135,7 +168,8 @@ graph TB
     end
 ```
 
-Quench asks a question none of them ask:
+Quench asks a different question — one the *authored* tools cannot answer,
+and one two recent observation-first systems also ask (§4.1):
 
 > **Which of my agent's ad-hoc, LLM-driven behaviours have quietly become a
 > workflow, without anyone writing it down?**
@@ -155,7 +189,10 @@ Two things are true at once, and holding both is the whole idea:
    keeps.
 
 So determinism becomes an **empirical property discovered from evidence**, not a
-design-time assertion. That reframing is the intellectual property.
+design-time assertion. That reframing is the foundation — though not, on its own,
+the defensible part: two other systems reached it independently (§4). What
+follows from it, and what nobody else has built, is a *transferable* artifact
+carrying its own proof.
 
 It also means Quench's claims are falsifiable in a way authored-workflow tools'
 claims are not. A `.lobster` file says "this is deterministic" because a human
@@ -608,8 +645,9 @@ signed artifact, and runs it without a model — falling back the instant the wo
 stops matching.
 
 **The differentiator**
-Everyone else makes determinism something you author. Quench makes it something
-you earn.
+Most of the field makes determinism something you author. Quench makes it
+something you earn — and the only one that makes the result a portable,
+signed, inspectable artifact.
 
 **The trust model**
 Shadow Mode is mandatory. Sealing is a cache, not a promise. Only the model call
