@@ -84,24 +84,34 @@ def main() -> int:
         print(f"  baseline: {'PROMOTE' if base else 'reject'} — {base.reason}")
 
         stable = verdict.control_flow_stable_steps
+        observable = verdict.observable_steps
         impure = verdict.impure_steps
-        pooled_stable += len(stable)
+        pooled_stable += len(observable)   # D1: observable is the denominator
         pooled_impure += len(impure)
 
-        print(f"  oracle:   {len(stable)} control-flow-stable, {len(impure)} impure")
+        print(
+            f"  oracle:   {len(stable)} control-flow-stable, "
+            f"{len(observable)} observable, {len(impure)} impure"
+        )
 
         for step in verdict.steps:
             if not step.control_flow_stable:
                 continue
-            sample = step.sample_a
-            detected = detector.inspect(sample)
-            matrix = matrix.plus(step.impure, bool(detected))
+            detected = detector.inspect(step.sample_a)
+            # Only observable steps contribute to the H2 matrix.
+            if step.observable:
+                matrix = matrix.plus(step.impure, bool(detected))
 
-            flag = "IMPURE" if step.impure else "pure  "
+            flag = {
+                "impure": "IMPURE",
+                "pure": "pure  ",
+                "unobservable": "n/obs ",
+            }.get(step.classification, "?     ")
             seen = ",".join(detected.classes) if detected.classes else "-"
             print(
                 f"    [{step.position}] {flag}  {step.tool_name.split('/')[-1]:<16}"
-                f" outputs={step.distinct_outputs:<3} detector={seen}"
+                f" repeats={step.repeated_inputs:<3} outputs={step.distinct_outputs:<3}"
+                f" detector={seen}"
             )
             if step.impure and base and step.position in base.stable_positions:
                 baseline_wrong.append((name, step))
@@ -112,6 +122,7 @@ def main() -> int:
                 "traces": len(group),
                 "steps": verdict.step_count,
                 "control_flow_stable": len(stable),
+                "observable": len(observable),
                 "impure": len(impure),
                 "impurity_rate": verdict.impurity_rate,
                 "baseline_promotes": bool(base),
@@ -120,11 +131,11 @@ def main() -> int:
 
     # ---------------------------------------------------------------- results
     print("\n" + "=" * 72)
-    print("H1 — impurity among control-flow-stable steps")
+    print("H1 — impurity among OBSERVABLE steps (D1-corrected)")
     print("=" * 72)
     rate = pooled_impure / pooled_stable if pooled_stable else 0.0
     low, high = wilson(pooled_impure, pooled_stable)
-    print(f"  impure / stable   {pooled_impure} / {pooled_stable}")
+    print(f"  impure / observable  {pooled_impure} / {pooled_stable}")
     print(f"  rate              {rate:.1%}   95% CI [{low:.1%}, {high:.1%}]")
     print("  predicted         20.0%   interval 8-40%   (registered 2026-09-11)")
     if rate < 0.05:

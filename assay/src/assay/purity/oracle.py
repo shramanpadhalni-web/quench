@@ -38,6 +38,21 @@ def serialise(value: Any) -> str:
         return repr(value)
 
 
+def _input_repeats(sequences: list, position: int, key: str) -> bool:
+    """True when this exact input value occurs in more than one trace.
+
+    Purity is only observable where an input recurs: a single occurrence gives
+    nothing to compare against. See DEVIATION D1.
+    """
+    seen = 0
+    for sequence in sequences:
+        if serialise(sequence[position].payload) == key:
+            seen += 1
+            if seen > 1:
+                return True
+    return False
+
+
 @dataclass(frozen=True)
 class StepVerdict:
     """The oracle's judgement on one step position."""
@@ -48,8 +63,12 @@ class StepVerdict:
     impure: bool
     distinct_outputs: int
     trace_count: int
+    #: Whether any input value recurred, making purity observable at all.
+    observable: bool = False
+    #: How many distinct input values recurred across traces.
+    repeated_inputs: int = 0
     purpose: str | None = None
-    #: Two differing outputs, for the paper's examples. Truncated.
+    #: Two differing outputs for the SAME input, for the paper's examples.
     sample_a: str = ""
     sample_b: str = ""
 
@@ -57,6 +76,8 @@ class StepVerdict:
     def classification(self) -> str:
         if not self.control_flow_stable:
             return "unstable"
+        if not self.observable:
+            return "unobservable"
         return "impure" if self.impure else "pure"
 
 
@@ -73,19 +94,25 @@ class WorkflowVerdict:
         return tuple(s for s in self.steps if s.control_flow_stable)
 
     @property
+    def observable_steps(self) -> tuple[StepVerdict, ...]:
+        """Control-flow-stable steps where some input value recurred.
+
+        The H1 denominator, per DEVIATION D1: purity cannot be judged for a step
+        whose inputs never repeat.
+        """
+        return tuple(s for s in self.steps if s.control_flow_stable and s.observable)
+
+    @property
     def impure_steps(self) -> tuple[StepVerdict, ...]:
         return tuple(s for s in self.steps if s.impure)
 
     @property
     def impurity_rate(self) -> float:
-        """Impure steps as a fraction of control-flow-stable steps.
-
-        This is the quantity H1 predicts at 20%.
-        """
-        stable = self.control_flow_stable_steps
-        if not stable:
+        """Impure steps as a fraction of *observable* steps. H1 predicts 20%."""
+        observable = self.observable_steps
+        if not observable:
             return 0.0
-        return len(self.impure_steps) / len(stable)
+        return len(self.impure_steps) / len(observable)
 
 
 def evaluate(traces: list) -> WorkflowVerdict:
@@ -119,13 +146,35 @@ def evaluate(traces: list) -> WorkflowVerdict:
             if position < len(call_of_operation)
             else position
         )
-        serialised = [
-            serialise(o[call_index]) if call_index < len(o) else ""
-            for o in outputs
-        ]
-        distinct = sorted(set(serialised))
 
-        impure = stable and len(distinct) > 1
+        # DEVIATION D1 (2026-09-11): impurity is judged within groups of traces
+        # sharing identical input VALUES, not merely identical input shape.
+        # Different inputs legitimately produce different outputs; scoring that
+        # as impurity measures the corpus's diversity, not the step's purity.
+        by_input: dict[str, set[str]] = {}
+        for trace_index, sequence in enumerate(sequences):
+            key = serialise(sequence[position].payload)
+            out = (
+                serialise(outputs[trace_index][call_index])
+                if call_index < len(outputs[trace_index])
+                else ""
+            )
+            by_input.setdefault(key, set()).add(out)
+
+        # Only inputs seen more than once can reveal impurity.
+        repeated = {k: v for k, v in by_input.items() if len(v) >= 1}
+        observable = [k for k in by_input if _input_repeats(sequences, position, k)]
+
+        impure = stable and any(len(by_input[k]) > 1 for k in observable)
+        distinct = sorted({o for outs in by_input.values() for o in outs})
+
+        # Surface a differing pair from a single input group, not across groups.
+        sample_a = sample_b = ""
+        for key in observable:
+            outs = sorted(by_input[key])
+            if len(outs) > 1:
+                sample_a, sample_b = outs[0], outs[1]
+                break
         steps.append(
             StepVerdict(
                 position=position,
@@ -133,10 +182,12 @@ def evaluate(traces: list) -> WorkflowVerdict:
                 purpose=sequences[0][position].purpose,
                 control_flow_stable=stable,
                 impure=impure,
+                observable=bool(observable),
+                repeated_inputs=len(observable),
                 distinct_outputs=len(distinct),
                 trace_count=len(traces),
-                sample_a=distinct[0][:300] if distinct else "",
-                sample_b=distinct[1][:300] if len(distinct) > 1 else "",
+                sample_a=(sample_a or (distinct[0] if distinct else ""))[:300],
+                sample_b=sample_b[:300],
             )
         )
 
