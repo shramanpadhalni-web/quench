@@ -4,21 +4,39 @@
   "resources": [],
   "name": "lease-supervisor",
   "description": "Orchestrates the lease abstraction pipeline across three subagents.",
-  "prompt": "You are the SUPERVISOR of a lease abstraction pipeline.\n\nYou do NOT read leases or extract clauses yourself. You delegate.\n\nGiven a document id, run this pipeline:\n  1. spawn_run(agent='lease-intake', task='Validate <id>')\n     Wait for the completion event.\n  2. spawn_run(agent='lease-extractor', task='Extract <id>')\n     Wait for the completion event.\n  3. spawn_run(agent='lease-anomaly', task='Check <values from step 2>')\n     Wait for the completion event.\n\nNever start a step before the previous completion event has arrived. Never call a lease tool directly.\n\nFinally reply with exactly one line:\n  ABSTRACTED <document_id> <CLEAN|FLAGGED> term=<t> rent=<r>",
+  "prompt": "You are the SUPERVISOR of a lease abstraction pipeline.\n\nYou do NOT read leases or extract clauses yourself. You delegate.\n\nGiven a document id, run this pipeline:\n  1. spawn_run(agent='lease-intake', task='Validate <id>')\n     Then poll spawn_status until it reports done, and read its result.\n  2. spawn_run(agent='lease-extractor', task='Extract <id>')\n     Then poll spawn_status until it reports done, and read its result.\n  3. spawn_run(agent='lease-anomaly', task='Check <values from step 2>')\n     Then poll spawn_status until it reports done, and read its result.\n\nNever start a step before the previous subagent has reported done via spawn_status. If completion events are not pushed to you, poll with spawn_status - do not assume, and never invent a result. Never call a lease tool directly.\n\nFinally reply with exactly one line:\n  ABSTRACTED <document_id> <CLEAN|FLAGGED> term=<t> rent=<r>",
   "tools": [
     "@kirocrew-core"
   ],
   "allowedTools": [
-    "@kirocrew-core/spawn_run"
+    "@kirocrew-core/spawn_run",
+    "@kirocrew-core/spawn_list",
+    "@kirocrew-core/spawn_status",
+    "@kirocrew-core/wait"
   ],
   "mcpServers": {
-    "lease-tools": {
-      "command": "/home/shramanpadhalni/quench/.venv/bin/python",
+    "kirocrew-core": {
+      "command": "/home/shramanpadhalni/.local/share/pipx/venvs/kirocrew/bin/kirocrew",
       "args": [
-        "-m",
-        "backend.mcp_tools"
-      ],
-      "cwd": "/home/shramanpadhalni/quench/examples/lease-abstraction"
+        "mcp-core"
+      ]
     }
+  },
+  "hooks": {
+    "postToolUse": [
+      {
+        "command": "/home/shramanpadhalni/.kiro/hooks/quench-trace-post.sh"
+      }
+    ],
+    "preToolUse": [
+      {
+        "command": "/home/shramanpadhalni/.kiro/hooks/quench-trace-pre.sh"
+      }
+    ],
+    "userPromptSubmit": [
+      {
+        "command": "/home/shramanpadhalni/.kiro/hooks/quench-trace-prompt.sh"
+      }
+    ]
   }
 }

@@ -17,10 +17,25 @@
     "lease-tools": {
       "command": "/home/shramanpadhalni/quench/.venv/bin/python",
       "args": [
-        "-m",
-        "backend.mcp_tools"
-      ],
-      "cwd": "/home/shramanpadhalni/quench/examples/lease-abstraction"
+        "/home/shramanpadhalni/quench/examples/lease-abstraction/backend/mcp_tools.py"
+      ]
     }
+  },
+  "hooks": {
+    "postToolUse": [
+      {
+        "command": "/home/shramanpadhalni/.kiro/hooks/quench-trace-post.sh"
+      }
+    ],
+    "preToolUse": [
+      {
+        "command": "/home/shramanpadhalni/.kiro/hooks/quench-trace-pre.sh"
+      }
+    ],
+    "userPromptSubmit": [
+      {
+        "command": "/home/shramanpadhalni/.kiro/hooks/quench-trace-prompt.sh"
+      }
+    ]
   }
 }
