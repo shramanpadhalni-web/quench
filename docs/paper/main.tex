@@ -21,6 +21,9 @@
 \usepackage{hyperref}
 \usepackage{url}
 \usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,positioning,arrows.meta}
+\input{figures}
 
 \hypersetup{colorlinks=true, linkcolor=black, citecolor=black, urlcolor=blue}
 
@@ -117,6 +120,8 @@ captured: a directory listing whose output embedded a modification time.
 -rw-r--r-- 1 1000 1000 99 Sep 09 14:15 .../quench-test.txt
 \end{lstlisting}
 
+\figSequenceVsValue{}
+
 \noindent The step is non-branching. Its input signature is stable. Its output
 differs on every execution. A control-flow-only criterion promotes it, and the
 resulting artifact replays a frozen timestamp for as long as it is trusted.
@@ -197,6 +202,8 @@ available: silent, plausible, and persistent.
 
 \section{Purity: Oracle and Detector}
 \label{sec:purity}
+
+\figTwoGates{}
 
 We separate ground truth from what a running system can afford.
 
@@ -335,6 +342,8 @@ argue below is not straightforwardly an error.
 
 Step~0 is a directory listing. The detector flagged an \texttt{ls}-style
 modification time; the oracle scored the step pure.
+
+\figOracleDetector{}
 
 Both are defensible. The pattern is genuinely present, and the listing
 \emph{will} return different bytes once any file in that directory changes. But
