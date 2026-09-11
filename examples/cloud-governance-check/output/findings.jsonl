@@ -1,0 +1,31 @@
+{"compliant": true, "failures": [], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:31:44+00:00", "resource_id": "bucket-001"}
+{"compliant": true, "failures": [], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:32:22+00:00", "resource_id": "bucket-001"}
+{"compliant": true, "failures": [], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:32:44+00:00", "resource_id": "bucket-002"}
+{"compliant": true, "failures": [], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:33:07+00:00", "resource_id": "bucket-003"}
+{"compliant": false, "failures": ["encryption='none' not in ['AES256', 'aws:kms']", "versioning='disabled' not in ['enabled']", "public_access_block=False not in [True]"], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:33:28+00:00", "resource_id": "bucket-004"}
+{"compliant": true, "failures": [], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:33:50+00:00", "resource_id": "bucket-005"}
+{"compliant": true, "failures": [], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:34:14+00:00", "resource_id": "bucket-006"}
+{"compliant": true, "failures": [], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:34:35+00:00", "resource_id": "bucket-007"}
+{"compliant": false, "failures": ["encryption='none' not in ['AES256', 'aws:kms']", "versioning='disabled' not in ['enabled']", "public_access_block=False not in [True]"], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:34:58+00:00", "resource_id": "bucket-008"}
+{"compliant": true, "failures": [], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:38:08+00:00", "resource_id": "bucket-009"}
+{"compliant": true, "failures": [], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:38:28+00:00", "resource_id": "bucket-010"}
+{"compliant": true, "failures": [], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:38:51+00:00", "resource_id": "bucket-001"}
+{"compliant": true, "failures": [], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:39:15+00:00", "resource_id": "bucket-002"}
+{"compliant": true, "failures": [], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:39:36+00:00", "resource_id": "bucket-003"}
+{"compliant": false, "failures": ["encryption='none' not in ['AES256', 'aws:kms']", "versioning='disabled' not in ['enabled']", "public_access_block=False not in [True]"], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:40:00+00:00", "resource_id": "bucket-004"}
+{"compliant": true, "failures": [], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:40:24+00:00", "resource_id": "bucket-005"}
+{"compliant": true, "failures": [], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:40:44+00:00", "resource_id": "bucket-006"}
+{"compliant": true, "failures": [], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:41:08+00:00", "resource_id": "bucket-007"}
+{"compliant": false, "failures": ["encryption='none' not in ['AES256', 'aws:kms']", "versioning='disabled' not in ['enabled']", "public_access_block=False not in [True]"], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:41:29+00:00", "resource_id": "bucket-008"}
+{"compliant": true, "failures": [], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:41:51+00:00", "resource_id": "bucket-009"}
+{"compliant": true, "failures": [], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:42:16+00:00", "resource_id": "bucket-010"}
+{"compliant": true, "failures": [], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:42:42+00:00", "resource_id": "bucket-001"}
+{"compliant": true, "failures": [], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:43:03+00:00", "resource_id": "bucket-002"}
+{"compliant": true, "failures": [], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:43:26+00:00", "resource_id": "bucket-003"}
+{"compliant": false, "failures": ["encryption='none' not in ['AES256', 'aws:kms']", "versioning='disabled' not in ['enabled']", "public_access_block=False not in [True]"], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:43:49+00:00", "resource_id": "bucket-004"}
+{"compliant": true, "failures": [], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:44:11+00:00", "resource_id": "bucket-005"}
+{"compliant": true, "failures": [], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:44:36+00:00", "resource_id": "bucket-006"}
+{"compliant": true, "failures": [], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:44:59+00:00", "resource_id": "bucket-007"}
+{"compliant": false, "failures": ["encryption='none' not in ['AES256', 'aws:kms']", "versioning='disabled' not in ['enabled']", "public_access_block=False not in [True]"], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:45:21+00:00", "resource_id": "bucket-008"}
+{"compliant": true, "failures": [], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:45:45+00:00", "resource_id": "bucket-009"}
+{"compliant": true, "failures": [], "policy_id": "enc-baseline-v3", "recorded_at": "2026-09-11T06:46:09+00:00", "resource_id": "bucket-010"}

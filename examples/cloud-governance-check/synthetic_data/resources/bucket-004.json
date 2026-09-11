@@ -1,0 +1,9 @@
+{
+  "resource_id": "bucket-004",
+  "type": "object_store",
+  "region": "ap-southeast-2",
+  "encryption": "none",
+  "versioning": "disabled",
+  "public_access_block": false,
+  "owner": "team-3"
+}

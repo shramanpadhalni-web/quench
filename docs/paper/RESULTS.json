@@ -1,26 +1,26 @@
 {
-  "traces": 116,
-  "workflows_analysed": 3,
+  "traces": 147,
+  "workflows_analysed": 4,
   "h1": {
-    "impure": 0,
-    "stable": 11,
-    "rate": 0.0,
+    "impure": 1,
+    "stable": 16,
+    "rate": 0.0625,
     "ci95": [
-      2.7755575615628914e-17,
-      0.2588400172488141
+      0.01111905730833121,
+      0.2832926836802987
     ],
     "predicted": 0.2
   },
   "h2": {
-    "tp": 0,
-    "fp": 0,
-    "tn": 11,
+    "tp": 1,
+    "fp": 1,
+    "tn": 14,
     "fn": 0,
-    "precision": 0.0,
-    "recall": 0.0
+    "precision": 0.5,
+    "recall": 1.0
   },
   "h3": {
-    "wrongly_promoted": 0
+    "wrongly_promoted": 1
   },
   "per_workflow": [
     {
@@ -51,6 +51,16 @@
       "observable": 4,
       "impure": 0,
       "impurity_rate": 0.0,
+      "baseline_promotes": true
+    },
+    {
+      "workflow": "read -> read -> read -> shell -> shell",
+      "traces": 31,
+      "steps": 5,
+      "control_flow_stable": 5,
+      "observable": 5,
+      "impure": 1,
+      "impurity_rate": 0.2,
       "baseline_promotes": true
     }
   ]

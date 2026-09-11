@@ -1,0 +1,9 @@
+{
+  "resource_id": "bucket-016",
+  "type": "object_store",
+  "region": "us-east-1",
+  "encryption": "none",
+  "versioning": "disabled",
+  "public_access_block": false,
+  "owner": "team-6"
+}

@@ -1,0 +1,15 @@
+{
+  "policy_id": "enc-baseline-v3",
+  "requires": {
+    "encryption": [
+      "AES256",
+      "aws:kms"
+    ],
+    "versioning": [
+      "enabled"
+    ],
+    "public_access_block": [
+      true
+    ]
+  }
+}

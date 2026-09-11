@@ -1,0 +1,38 @@
+governance corpus | passes=3 resources=10
+
+--- pass 1/3 ---
+  bucket-001   PASS  delta=11   ok
+  bucket-002   PASS  delta=11   ok
+  bucket-003   PASS  delta=11   ok
+  bucket-004   PASS  delta=11   ok
+  bucket-005   PASS  delta=11   ok
+  bucket-006   PASS  delta=11   ok
+  bucket-007   PASS  delta=11   ok
+  bucket-008   PASS  delta=11   ok
+  bucket-009   PASS  delta=11   ok
+  bucket-010   PASS  delta=11   ok
+--- pass 2/3 ---
+  bucket-001   PASS  delta=11   ok
+  bucket-002   PASS  delta=11   ok
+  bucket-003   PASS  delta=11   ok
+  bucket-004   PASS  delta=11   ok
+  bucket-005   PASS  delta=11   ok
+  bucket-006   PASS  delta=11   ok
+  bucket-007   PASS  delta=11   ok
+  bucket-008   PASS  delta=11   ok
+  bucket-009   PASS  delta=11   ok
+  bucket-010   PASS  delta=11   ok
+--- pass 3/3 ---
+  bucket-001   PASS  delta=11   ok
+  bucket-002   PASS  delta=11   ok
+  bucket-003   PASS  delta=11   ok
+  bucket-004   PASS  delta=11   ok
+  bucket-005   PASS  delta=11   ok
+  bucket-006   PASS  delta=11   ok
+  bucket-007   PASS  delta=11   ok
+  bucket-008   PASS  delta=11   ok
+  bucket-009   PASS  delta=11   ok
+  bucket-010   PASS  delta=11   ok
+
+sessions: 30/30 verified
+trace events: 1399

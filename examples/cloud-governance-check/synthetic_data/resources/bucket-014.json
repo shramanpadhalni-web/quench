@@ -1,0 +1,9 @@
+{
+  "resource_id": "bucket-014",
+  "type": "object_store",
+  "region": "eu-west-1",
+  "encryption": "AES256",
+  "versioning": "enabled",
+  "public_access_block": true,
+  "owner": "team-5"
+}
