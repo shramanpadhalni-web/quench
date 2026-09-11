@@ -1,0 +1,207 @@
+<!-- Quench dashboard. Single file, no build step, no dependencies.
+     Served by `quench serve`. Deliberately self-contained so it can be opened
+     against any Quench instance without a toolchain. -->
+<title>Quench</title>
+<style>
+  :root {
+    --bg: #ffffff; --fg: #14161a; --dim: #6b7280; --line: #e5e7eb;
+    --panel: #f9fafb; --accent: #1f2937;
+    --observing: #9ca3af; --shadow: #b45309; --sealed: #15803d; --revoked: #b91c1c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1115; --fg: #e6e8ec; --dim: #9aa1ab; --line: #242830;
+      --panel: #161920; --accent: #e6e8ec;
+      --observing: #6b7280; --shadow: #d97706; --sealed: #22c55e; --revoked: #ef4444;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1115; --fg: #e6e8ec; --dim: #9aa1ab; --line: #242830;
+    --panel: #161920; --accent: #e6e8ec;
+    --observing: #6b7280; --shadow: #d97706; --sealed: #22c55e; --revoked: #ef4444;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--fg); margin: 0;
+    font: 14px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 32px 20px 64px; }
+  header { border-bottom: 1px solid var(--line); padding-bottom: 18px; margin-bottom: 28px; }
+  h1 { font-size: 20px; margin: 0 0 4px; letter-spacing: -.01em; }
+  .sub { color: var(--dim); font-size: 13px; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .07em;
+       color: var(--dim); margin: 34px 0 12px; font-weight: 600; }
+
+  .lifecycle { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+  .stage { flex: 1 1 150px; border: 1px solid var(--line); border-radius: 6px;
+           padding: 12px 14px; background: var(--panel); }
+  .stage .n { font-size: 26px; font-weight: 600; line-height: 1.1; }
+  .stage .l { font-size: 12px; color: var(--dim); text-transform: uppercase;
+              letter-spacing: .06em; }
+  .stage.observing .n { color: var(--observing); }
+  .stage.shadow .n { color: var(--shadow); }
+  .stage.sealed .n { color: var(--sealed); }
+  .stage.revoked .n { color: var(--revoked); }
+
+  .card { border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px;
+          margin-bottom: 10px; background: var(--panel); }
+  .row { display: flex; justify-content: space-between; align-items: baseline;
+         gap: 12px; flex-wrap: wrap; }
+  .badge { font-size: 11px; font-weight: 600; text-transform: uppercase;
+           letter-spacing: .06em; padding: 2px 8px; border-radius: 3px;
+           border: 1px solid currentColor; }
+  .badge.observing { color: var(--observing); }
+  .badge.shadow { color: var(--shadow); }
+  .badge.sealed { color: var(--sealed); }
+  .badge.revoked { color: var(--revoked); }
+
+  .flow { font: 12px ui-monospace, SFMono-Regular, Menlo, monospace;
+          color: var(--dim); margin-top: 7px; overflow-x: auto;
+          white-space: nowrap; padding-bottom: 2px; }
+  .meta { font-size: 12px; color: var(--dim); margin-top: 6px; }
+  .progress { height: 3px; background: var(--line); border-radius: 2px;
+              margin-top: 9px; overflow: hidden; }
+  .progress > i { display: block; height: 100%; background: var(--shadow); }
+
+  button { font: inherit; font-size: 12px; padding: 5px 12px; cursor: pointer;
+           border: 1px solid var(--line); border-radius: 4px;
+           background: var(--bg); color: var(--fg); }
+  button:hover:not(:disabled) { border-color: var(--accent); }
+  button:disabled { opacity: .4; cursor: default; }
+
+  .note { font-size: 12px; margin-top: 9px; padding: 9px 11px; border-radius: 4px;
+          border: 1px solid var(--line); background: var(--bg); }
+  .note.bad { border-color: var(--revoked); }
+  .note.good { border-color: var(--sealed); }
+  .note code { font: 12px ui-monospace, monospace; }
+  .empty { color: var(--dim); font-size: 13px; padding: 18px 0; }
+  footer { margin-top: 44px; padding-top: 16px; border-top: 1px solid var(--line);
+           color: var(--dim); font-size: 12px; }
+  a { color: inherit; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Quench</h1>
+    <div class="sub">Workflows earn their way out of the model loop &mdash; and lose it again on drift.</div>
+  </header>
+
+  <div class="lifecycle" id="lifecycle"></div>
+  <div class="sub" style="font-size:12px">
+    Observing &rarr; Shadow (compares against the live agent, side effects discarded)
+    &rarr; Sealed (executes with no model). Drift demotes.
+  </div>
+
+  <h2>Candidate workflows</h2>
+  <div id="candidates"><div class="empty">loading&hellip;</div></div>
+
+  <h2>Sealed artifacts</h2>
+  <div id="ingots"><div class="empty">loading&hellip;</div></div>
+
+  <footer>
+    Sealing is a cache, not a promise. Every execution re-checks live inputs
+    against the sealed signature.
+    <span id="src"></span>
+  </footer>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, c =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+async function api(path, body) {
+  const opts = body
+    ? { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body) }
+    : {};
+  const res = await fetch(path, opts);
+  return res.json();
+}
+
+function lifecycle(summary) {
+  const order = ["observing", "shadow", "sealed", "revoked"];
+  $("lifecycle").innerHTML = order.map(s => `
+    <div class="stage ${s}">
+      <div class="n">${summary[s] ?? 0}</div>
+      <div class="l">${s}</div>
+    </div>`).join("");
+}
+
+function candidate(c) {
+  const promoteAt = 10;
+  const pct = Math.min(100, (c.consecutive_matches / promoteAt) * 100);
+  const ready = c.eligible ? "" :
+    `<span class="meta">needs ${c.needs} more trace(s)</span>`;
+  return `
+    <div class="card" data-idx="${c.index}">
+      <div class="row">
+        <strong>${esc(c.label).slice(0, 72)}</strong>
+        <span class="badge ${c.state}">${c.state}</span>
+      </div>
+      <div class="flow">${c.tools.map(esc).join(" &rarr; ")}</div>
+      <div class="row">
+        <span class="meta">
+          ${c.traces} traces &middot; ${c.steps} steps ${ready}
+          ${c.drift_events ? `&middot; ${c.drift_events} drift` : ""}
+        </span>
+        ${c.state === "observing" && c.eligible
+          ? `<button onclick="seal(${c.index})">Verify &amp; seal</button>` : ""}
+      </div>
+      ${c.state === "shadow" ? `
+        <div class="meta">shadow: ${c.consecutive_matches}/${promoteAt} consecutive matches</div>
+        <div class="progress"><i style="width:${pct}%"></i></div>` : ""}
+      <div id="r${c.index}"></div>
+    </div>`;
+}
+
+async function seal(index) {
+  const el = $("r" + index);
+  el.innerHTML = `<div class="note">verifying&hellip;</div>`;
+  const r = await api("/api/seal", { index });
+  if (r.sealed) {
+    el.innerHTML = `<div class="note good">
+      <strong>Sealed.</strong> ${esc(r.ingot_id)} &middot; ${r.steps} steps &middot;
+      verified by ${r.verified_by.map(esc).join(", ")}.<br>${esc(r.note)}</div>`;
+  } else {
+    el.innerHTML = `<div class="note bad">
+      <strong>Refused.</strong> ${(r.refusals || []).map(x =>
+        `<div><code>${esc(x)}</code></div>`).join("")}
+      ${r.passed?.length ? `<div class="meta">passed: ${r.passed.map(esc).join(", ")}</div>` : ""}
+      </div>`;
+  }
+  setTimeout(load, 600);
+}
+
+function ingot(i) {
+  return `
+    <div class="card">
+      <div class="row">
+        <strong>${esc(i.ingot_id)}</strong>
+        <span class="badge ${i.revoked ? "revoked" : "sealed"}">
+          ${i.revoked ? "revoked" : "signed"}</span>
+      </div>
+      <div class="flow">${(i.tools || []).map(esc).join(" &rarr; ")}</div>
+      <div class="meta">
+        ${i.steps} steps &middot; proven against ${i.trace_count ?? "?"} traces &middot;
+        ${(i.verified_by || []).map(esc).join(" + ")} &middot; ${esc(i.sealed_at)}
+      </div>
+    </div>`;
+}
+
+async function load() {
+  const [cands, ings, st] = await Promise.all([
+    api("/api/candidates"), api("/api/ingots"), api("/api/state")
+  ]);
+  lifecycle(st.summary || {});
+  $("candidates").innerHTML = cands.length
+    ? cands.map(candidate).join("")
+    : `<div class="empty">Nothing observed yet. Run an agent workflow a few times.</div>`;
+  $("ingots").innerHTML = ings.length
+    ? ings.map(ingot).join("")
+    : `<div class="empty">No sealed artifacts yet.</div>`;
+}
+
+load();
+setInterval(load, 15000);
+</script>
