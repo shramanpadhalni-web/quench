@@ -108,6 +108,12 @@ class Quench:
                     f"{step.distinct_outputs} distinct outputs for identical input "
                     f"across {step.trace_count} traces"
                 )
+        elif not purity.observable_steps:
+            # No input value recurred, so purity was never actually tested.
+            # Claiming it here would put "verified by: purity" in a signed
+            # provenance record on the strength of zero observations -- the
+            # exact overclaim this project exists to avoid.
+            passed.append("purity:not-observable")
         else:
             passed.append("purity")
         return passed, refusals

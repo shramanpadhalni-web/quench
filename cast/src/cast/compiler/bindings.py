@@ -33,7 +33,13 @@ PARSE = "$json"
 
 #: Values too small or too common to bind on. A binding to ``true`` or ``0``
 #: would match everywhere and mean nothing.
-MIN_BINDABLE_LEN = 8
+#:
+#: Lowered from 8 to 4 after a real miss: an identifier like ``"POL-500"`` is
+#: seven characters, and the longer threshold silently dropped a genuine
+#: data-flow edge. The protection against coincidence is not length but
+#: **universality** -- a candidate binding is kept only if it holds at the same
+#: path in every trace (see ``infer``), which a coincidental match will not.
+MIN_BINDABLE_LEN = 4
 
 #: Keys that carry agent commentary rather than data.
 IGNORED_INPUT_KEYS = {"__tool_use_purpose"}
