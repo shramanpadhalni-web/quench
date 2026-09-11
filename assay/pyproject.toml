@@ -3,7 +3,7 @@ name = "quench-assay"
 version = "0.1.0"
 description = "Deterministic verifier - seal-time verification and runtime drift checking"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = ["cryptography>=42"]
 
 [build-system]
 requires = ["setuptools>=68"]

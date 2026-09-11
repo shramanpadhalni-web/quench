@@ -18,9 +18,21 @@ echo "==> Python virtual environment"
 ./.venv/bin/pip install -q pytest
 
 echo "==> Installing components (editable)"
+# Do NOT swallow failures here. A silently skipped component produces a repo
+# that works on the machine that built it and nowhere else - exactly the bug
+# this line used to hide.
 for c in cast assay vault mill saga kernel pack exchange; do
-  ./.venv/bin/pip install -q -e "$ROOT/$c" 2>/dev/null || echo "    skipped $c"
+  ./.venv/bin/pip install -q -e "$ROOT/$c" || {
+    echo "FATAL: could not install component '$c'" >&2
+    exit 1
+  }
 done
+
+echo "==> Example dependencies"
+./.venv/bin/pip install -q "mcp>=2" || {
+  echo "FATAL: could not install mcp (needed by examples/lease-abstraction)" >&2
+  exit 1
+}
 
 echo "==> Trace hooks"
 ./scripts/install_hooks.sh
