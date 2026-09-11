@@ -179,6 +179,12 @@ $j, k$ with $x_i^{(j)} = x_i^{(k)}$ (equal as values, not merely as shapes), we
 have $y_i^{(j)} = y_i^{(k)}$.
 \end{definition}
 
+The antecedent here is exactly what Khatchadourian calls \emph{signature
+determinism} --- ``the fraction of runs with identical tool sequences
+\emph{and} arguments''~\cite{dfah2026}. That work measures how often an agent
+reaches this regime. Purity asks what happens inside it, which that framework
+explicitly does not validate (\S\ref{sec:related}).
+
 The quantifier matters and is easy to get wrong. Purity is a claim about traces
 sharing identical input \emph{values}. Comparing outputs across traces that
 merely share an input \emph{shape} measures the diversity of the corpus, not the
@@ -472,6 +478,44 @@ through one-shot recording and branch-free template replay; being single-shot,
 it has no opportunity to observe output variation at all, which makes the purity
 question more acute rather than less.
 
+\paragraph{Measuring agent determinism.} Khatchadourian's
+DFAH~\cite{dfah2026} is the nearest work on the measurement side, and its
+decomposition of determinism is the one we build on. It defines \emph{action
+determinism} as ``the fraction of runs with identical tool sequences'',
+\emph{signature determinism} as ``the fraction of runs with identical tool
+sequences \emph{and} arguments'', and \emph{decision determinism} as ``the
+fraction of runs with identical final decisions'', and reports that determinism
+and accuracy do not correlate across 4{,}700 runs --- so both must be measured
+independently.
+
+Signature determinism is precisely the precondition under which our question
+becomes askable: it is the regime in which the same tool is called with the same
+arguments. DFAH measures how often an agent reaches that regime; it does not ask
+what happens inside it. The framework ``does not validate whether identical tool
+inputs produce identical tool outputs'', and its treatment of non-determinism
+concerns model seeding rather than values embedded in tool responses.
+
+The division is clean and worth stating plainly. \textbf{DFAH measures whether
+the agent repeats. We measure whether the step reproduces, given that it does.}
+An agent may be perfectly signature-deterministic over a step that returns a
+fresh timestamp on every call; that is a success by DFAH's metric and a
+promotion hazard by ours. That two independent lines of work arrived at the need
+to decompose determinism is, we think, evidence the decomposition is real.
+
+\paragraph{Silent failure at the action boundary.} Reddy et
+al.~\cite{reasonless2026} report a different silent failure in tool-using
+agents: ``the final database is wrong, but no tool ever raises an error'',
+because a policy-permissive tool executes a well-formed call whose state
+transition the domain forbids. They find 78\% of failures in their benchmark are
+of this kind, and mitigate with deterministic read-only gates that inspect the
+proposed call and current state before a mutating call executes.
+
+The mechanism is adjacent to ours and the boundary differs. Their gates fire
+before execution and ask \emph{may this run?}; our check fires before promotion
+and asks \emph{will this reproduce?} Both are silent failures --- no error, no
+signal in the trace --- which we read as evidence that the absence of an error is
+a poor proxy for correctness in this class of system, at more than one boundary.
+
 \paragraph{Generation-first compilation.} Compiled AI~\cite{compiledai2026}
 constrains an LLM to generate business logic within validated templates,
 deployed as static code with no runtime inference. This is a different axis:
@@ -518,6 +562,18 @@ X.~Wang, K.~Yu, X.~Liang, L.~Wang, and C.~Han,
 \newblock ``Good to Go: The LOOP Skill Engine That Hits 99\% Success and Slashes
 Token Usage by 99\% via One-Shot Recording and Deterministic Replay,''
 \newblock arXiv:2605.14237, 2026.
+
+\bibitem{dfah2026}
+R.~Khatchadourian,
+\newblock ``Replayable Financial Agents: A Determinism-Faithfulness Assurance
+Harness for Tool-Using LLM Agents,''
+\newblock arXiv:2601.15322, 2026.
+
+\bibitem{reasonless2026}
+V.~Reddy, S.~R.~Challaram, and A.~Basu,
+\newblock ``Reason Less, Verify More: Deterministic Gates Recover a Silent
+Policy-Violation Failure Mode in Tool-Using LLM Agents,''
+\newblock arXiv:2607.07405, 2026.
 
 \bibitem{compiledai2026}
 XY.AI Labs,
