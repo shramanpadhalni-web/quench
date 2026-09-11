@@ -8,6 +8,20 @@ undisclosed deviations is worse than no preregistration at all.
 
 ---
 
+## A1 — 2026-09-11 — Author name (administrative, not scientific)
+
+`PREREGISTRATION.md` records the registering author as "Shraman Padhalni". The
+paper is published under the author's legal name, **Hem Chandra Padhalni**. The
+same person; `shramanpadhalni` is the handle used for the email account, the
+GitHub account, and therefore the commit authorship throughout this repository.
+
+The preregistration is **not** edited to reflect this. It was frozen on commit
+and its value depends on staying frozen; a correction recorded here is worth
+more than a silently improved document. Noted so a reader comparing the paper
+byline against the repository history is not left guessing.
+
+---
+
 ## D1 — 2026-09-11 — Oracle definition was wrong as registered
 
 **Status:** correction, applied before any result was reported or published.
