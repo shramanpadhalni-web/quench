@@ -123,7 +123,15 @@ class McpToolInvoker(ToolInvoker):
         result = message.get("result", {})
         if result.get("isError"):
             raise RuntimeError(f"{tool}: {result}")
-        return result
+
+        # Present the result in the SAME shape the trace hook recorded, because
+        # data-flow binding paths were inferred from those traces. The runtime
+        # wraps MCP results as {"items": [{"Json": <result>}]}; a raw MCP result
+        # would be correct and would make every inferred path unresolvable.
+        #
+        # Normalising to the observed shape is this adapter's job: it is the
+        # boundary between Mill and one runtime's reporting conventions.
+        return {"items": [{"Json": result}]}
 
     def close(self) -> None:
         if self._proc and self._proc.poll() is None:

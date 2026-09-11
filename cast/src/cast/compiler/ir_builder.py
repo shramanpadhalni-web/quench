@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from .bindings import infer as infer_bindings
 from .trace import Trace
 from .trace_diff import diff_traces
 from .typed_ir import Cast, CastStep, stable_hash
@@ -20,8 +21,12 @@ def build_cast(traces: list[Trace], minimum: int = 5, source: str = "unknown") -
     if not diff:
         raise CompilationRejected(diff.reason)
 
+    # Data flow is discovered from the traces, not declared. A binding that
+    # does not hold in every trace is not kept.
+    edges = infer_bindings(traces)
     steps = tuple(
-        CastStep(index=i, operation=op) for i, op in enumerate(diff.operations)
+        CastStep(index=i, operation=op, bindings=edges.get(i, ()))
+        for i, op in enumerate(diff.operations)
     )
     skill_signature = stable_hash([s.signature for s in steps])
 

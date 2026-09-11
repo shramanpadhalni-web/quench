@@ -61,6 +61,9 @@ class CastStep:
     index: int
     operation: Operation
     output_signature: str | None = None
+    #: Input fields resolved from earlier steps' outputs. Inferred from traces,
+    #: never declared. See `bindings.py`.
+    bindings: tuple = ()
 
     @property
     def signature(self) -> str:

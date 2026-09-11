@@ -21,6 +21,8 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
+
+from cast.compiler.bindings import Binding
 from pathlib import Path
 from typing import Any
 
@@ -39,6 +41,8 @@ class SealedStep:
     #: sha256 over tool_name + input_shape.
     signature: str
     purpose: str | None = None
+    #: Input fields resolved from earlier steps at execution time.
+    bindings: tuple = ()
 
     def to_dict(self) -> dict:
         return {
@@ -47,6 +51,7 @@ class SealedStep:
             "input_shape": self.input_shape,
             "signature": self.signature,
             "purpose": self.purpose,
+            "bindings": [b.to_dict() for b in self.bindings],
         }
 
     @classmethod
@@ -57,6 +62,9 @@ class SealedStep:
             input_shape=data["input_shape"],
             signature=data["signature"],
             purpose=data.get("purpose"),
+            bindings=tuple(
+                Binding.from_dict(b) for b in data.get("bindings", [])
+            ),
         )
 
 
@@ -127,6 +135,7 @@ def from_cast(cast, hallmark, metadata: dict | None = None) -> Ingot:
             input_shape=structural_signature(step.operation.payload),
             signature=step.signature,
             purpose=step.operation.purpose,
+            bindings=tuple(step.bindings),
         )
         for step in cast.steps
     )

@@ -101,3 +101,24 @@ def check(ingot, live_inputs: list[dict]) -> DriftReport:
             )
 
     return DriftReport(matches=True)
+
+
+def check_step(step, payload: dict) -> DriftReport:
+    """Check one step's COMPLETE payload against its sealed shape.
+
+    Called after data-flow bindings are resolved. Checking before would report
+    every bound field as missing, since the caller never supplies those.
+    """
+    from cast.compiler.typed_ir import structural_signature
+
+    actual = structural_signature(payload)
+    difference = _diff_shape(step.input_shape, actual)
+    if difference:
+        return DriftReport(
+            matches=False,
+            step_index=step.index,
+            expected=step.input_shape,
+            actual=actual,
+            reason=difference,
+        )
+    return DriftReport(matches=True)

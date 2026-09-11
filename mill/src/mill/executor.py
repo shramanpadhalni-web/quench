@@ -24,6 +24,8 @@ import time
 from dataclasses import dataclass, field
 from typing import Any
 
+from cast.compiler import bindings
+
 from . import drift
 from .ports.tool_invoker import ToolInvoker
 
@@ -111,23 +113,60 @@ class Mill:
                     refusal="signature covers a different Cast than this ingot holds",
                 )
 
-        report = drift.check(ingot, live_inputs)
-        if not report:
-            return ExecutionResult(
-                executed=False,
-                refusal=report.describe(),
-                drift_report=report,
-            )
-
         started = time.perf_counter()
         results: list[StepResult] = []
-        for step, payload in zip(ingot.steps, live_inputs):
+        outputs: list[Any] = []
+
+        for step, supplied in zip(ingot.steps, live_inputs):
+            # Resolve data-flow bindings from earlier outputs, then merge with
+            # what the caller supplied. Bound fields win: their value is defined
+            # by the workflow, not by the caller.
+            payload = dict(supplied)
+            binding_error: str | None = None
+            for binding in getattr(step, "bindings", ()):
+                try:
+                    payload[binding.field] = bindings.resolve(
+                        outputs[binding.from_step], binding.path
+                    )
+                except (KeyError, IndexError, ValueError, TypeError) as exc:
+                    binding_error = (
+                        f"binding {binding.field} <- step {binding.from_step} "
+                        f"failed: {exc}"
+                    )
+                    break
+
+            if binding_error:
+                results.append(
+                    StepResult(
+                        index=step.index,
+                        tool_name=step.tool_name,
+                        output=None,
+                        duration_ms=0.0,
+                        error=binding_error,
+                    )
+                )
+                break
+
+            # Drift is checked per step, on the COMPLETE payload — after
+            # bindings are resolved, since a bound field is not supplied by the
+            # caller and would otherwise read as a missing field.
+            report = drift.check_step(step, payload)
+            if not report:
+                return ExecutionResult(
+                    executed=False,
+                    refusal=report.describe(),
+                    drift_report=report,
+                    steps=tuple(results),
+                )
+
             step_started = time.perf_counter()
             try:
                 output = self.invoker.invoke(step.tool_name, payload)
                 error = None
             except Exception as exc:  # an invoker failure is a step failure
                 output, error = None, f"{type(exc).__name__}: {exc}"
+
+            outputs.append(output)
             results.append(
                 StepResult(
                     index=step.index,
@@ -139,6 +178,8 @@ class Mill:
             )
             if error:
                 break  # do not continue a workflow whose earlier step failed
+
+        report = drift.DriftReport(matches=True)
 
         return ExecutionResult(
             executed=True,
