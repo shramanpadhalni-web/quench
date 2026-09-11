@@ -8,3 +8,4 @@ node_modules/
 .pytest_cache/
 scripts/_scaffold_*.py
 *.bak
+.commitmsg
