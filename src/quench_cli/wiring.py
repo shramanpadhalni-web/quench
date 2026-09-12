@@ -88,6 +88,55 @@ class Quench:
             "skills": [r.to_dict() for r in self.kernel.all()],
         }
 
+    def overview(self) -> dict:
+        """The numbers an operator actually asks for.
+
+        Deliberately not lifecycle counts. The landing question is "what is
+        this costing me and what can I compile", and a dashboard that answers
+        "6 candidates, 1 shadow" is answering a question only its author has.
+
+        One model call per step is a deliberate under-estimate of the agent
+        path: a real turn also spends calls on planning and on reading each
+        result back. Under-claiming is the right direction for a number that
+        will end up in front of a finance team.
+        """
+        rows = []
+        observed = avoidable = compiled = drift = 0
+
+        for row in self.candidates():
+            calls_per_run = row["steps"]
+            run_calls = calls_per_run * row["traces"]
+            observed += run_calls
+            drift += row["drift_events"]
+
+            sealed = row["state"] == "sealed"
+            compilable = row["eligible"] and row["state"] != "revoked"
+            if sealed:
+                compiled += 1
+                avoidable += run_calls
+
+            rows.append({
+                **row,
+                "name": _workflow_name(row),
+                "calls_per_run": calls_per_run,
+                "observed_calls": run_calls,
+                "avoidable_per_run": calls_per_run if compilable else 0,
+                "compilable": compilable,
+            })
+
+        return {
+            "observed_calls": observed,
+            "avoidable_calls": avoidable,
+            "potential_calls": sum(
+                r["observed_calls"] for r in rows if r["compilable"]
+            ),
+            "workflows": len(rows),
+            "compiled": compiled,
+            "drift_events": drift,
+            "summary": self.kernel.summary(),
+            "rows": rows,
+        }
+
     # --------------------------------------------------------------- verify
     def assess(self, traces) -> tuple[list[str], list[str]]:
         """Run both gates independently. Returns (passed, refusals)."""
@@ -169,6 +218,28 @@ class Quench:
         if r.ingot_id:
             self.vault.revoke(r.ingot_id)
         return {"skill_id": skill_id, "state": r.state.value}
+
+
+def _workflow_name(row: dict) -> str:
+    """A name a human recognises, not a hash.
+
+    Prefer the agent's own stated intent where the instrumentation records one;
+    otherwise describe the workflow by its shape. Either beats
+    ``351459a62d229d50``, which is what an operator saw in the first version of
+    this dashboard and could do nothing with.
+    """
+    label = (row.get("label") or "").strip()
+    # Agents commonly prefix a stated purpose with a step number.
+    for prefix in ("Step 1:", "Step 1 -", "step 1:"):
+        if label.startswith(prefix):
+            label = label[len(prefix):].strip()
+
+    tools = row.get("tools") or []
+    if len(label) > 8:
+        return label[:64]
+    if tools:
+        return f"{tools[0]} -> {tools[-1]}" if len(tools) > 1 else tools[0]
+    return row.get("skill_id", "")[:12]
 
 
 def _policy_from_env():

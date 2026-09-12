@@ -72,6 +72,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(app.candidates())
             if path == "/api/ingots":
                 return self._json(app.ingots())
+            if path == "/api/overview":
+                return self._json(app.overview())
             if path == "/api/state":
                 return self._json(app.state())
         except Exception as exc:  # never take the host process down

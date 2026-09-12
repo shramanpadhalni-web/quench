@@ -1,207 +1,289 @@
-<!-- Quench dashboard. Single file, no build step, no dependencies.
-     Served by `quench serve`. Deliberately self-contained so it can be opened
-     against any Quench instance without a toolchain. -->
+<!-- Quench dashboard.
+
+     React via CDN with htm, so there is no build step and the file stays
+     servable by a stdlib HTTP handler. Real components, no npm.
+
+     Designed around the questions an operator actually asks -- what is this
+     costing me, what can I compile, what broke -- rather than around Quench's
+     internal vocabulary. An earlier version showed "candidates" and "ingots"
+     and was, correctly, called useless. -->
 <title>Quench</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <style>
   :root {
-    --bg: #ffffff; --fg: #14161a; --dim: #6b7280; --line: #e5e7eb;
-    --panel: #f9fafb; --accent: #1f2937;
-    --observing: #9ca3af; --shadow: #b45309; --sealed: #15803d; --revoked: #b91c1c;
+    --bg:#fbfbfc; --panel:#fff; --fg:#12141a; --dim:#6b7280; --faint:#9ca3af;
+    --line:#e7e9ee; --accent:#111827;
+    --observing:#9ca3af; --shadow:#c2740a; --sealed:#15803d; --revoked:#b91c1c;
+    --good:#15803d; --bad:#b91c1c;
   }
   @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --bg: #0f1115; --fg: #e6e8ec; --dim: #9aa1ab; --line: #242830;
-      --panel: #161920; --accent: #e6e8ec;
-      --observing: #6b7280; --shadow: #d97706; --sealed: #22c55e; --revoked: #ef4444;
+    :root:not([data-theme=light]) {
+      --bg:#0c0e12; --panel:#14171d; --fg:#e8eaef; --dim:#9aa1ad; --faint:#6b7280;
+      --line:#232830; --accent:#e8eaef;
+      --observing:#6b7280; --shadow:#d98324; --sealed:#34d399; --revoked:#f87171;
+      --good:#34d399; --bad:#f87171;
     }
   }
-  :root[data-theme="dark"] {
-    --bg: #0f1115; --fg: #e6e8ec; --dim: #9aa1ab; --line: #242830;
-    --panel: #161920; --accent: #e6e8ec;
-    --observing: #6b7280; --shadow: #d97706; --sealed: #22c55e; --revoked: #ef4444;
+  :root[data-theme=dark] {
+    --bg:#0c0e12; --panel:#14171d; --fg:#e8eaef; --dim:#9aa1ad; --faint:#6b7280;
+    --line:#232830; --accent:#e8eaef;
+    --observing:#6b7280; --shadow:#d98324; --sealed:#34d399; --revoked:#f87171;
+    --good:#34d399; --bad:#f87171;
   }
-  * { box-sizing: border-box; }
-  body {
-    background: var(--bg); color: var(--fg); margin: 0;
-    font: 14px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  }
-  .wrap { max-width: 1060px; margin: 0 auto; padding: 32px 20px 64px; }
-  header { border-bottom: 1px solid var(--line); padding-bottom: 18px; margin-bottom: 28px; }
-  h1 { font-size: 20px; margin: 0 0 4px; letter-spacing: -.01em; }
-  .sub { color: var(--dim); font-size: 13px; }
-  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .07em;
-       color: var(--dim); margin: 34px 0 12px; font-weight: 600; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+    font:14px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+    -webkit-font-smoothing:antialiased}
+  .wrap{max-width:1120px;margin:0 auto;padding:28px 22px 80px}
 
-  .lifecycle { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
-  .stage { flex: 1 1 150px; border: 1px solid var(--line); border-radius: 6px;
-           padding: 12px 14px; background: var(--panel); }
-  .stage .n { font-size: 26px; font-weight: 600; line-height: 1.1; }
-  .stage .l { font-size: 12px; color: var(--dim); text-transform: uppercase;
-              letter-spacing: .06em; }
-  .stage.observing .n { color: var(--observing); }
-  .stage.shadow .n { color: var(--shadow); }
-  .stage.sealed .n { color: var(--sealed); }
-  .stage.revoked .n { color: var(--revoked); }
+  header{display:flex;justify-content:space-between;align-items:flex-end;
+    gap:16px;flex-wrap:wrap;margin-bottom:26px}
+  h1{margin:0;font-size:19px;letter-spacing:-.015em}
+  .tag{color:var(--dim);font-size:13px;margin-top:3px}
+  .live{font-size:12px;color:var(--faint);display:flex;align-items:center;gap:6px}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--sealed);
+    animation:p 2.4s ease-in-out infinite}
+  @keyframes p{0%,100%{opacity:1}50%{opacity:.25}}
 
-  .card { border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px;
-          margin-bottom: 10px; background: var(--panel); }
-  .row { display: flex; justify-content: space-between; align-items: baseline;
-         gap: 12px; flex-wrap: wrap; }
-  .badge { font-size: 11px; font-weight: 600; text-transform: uppercase;
-           letter-spacing: .06em; padding: 2px 8px; border-radius: 3px;
-           border: 1px solid currentColor; }
-  .badge.observing { color: var(--observing); }
-  .badge.shadow { color: var(--shadow); }
-  .badge.sealed { color: var(--sealed); }
-  .badge.revoked { color: var(--revoked); }
+  .stats{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+    margin-bottom:30px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:9px;
+    padding:15px 17px}
+  .stat .v{font-size:27px;font-weight:600;letter-spacing:-.02em;line-height:1.15}
+  .stat .k{font-size:11.5px;color:var(--dim);text-transform:uppercase;
+    letter-spacing:.07em;margin-top:3px}
+  .stat .h{font-size:12px;color:var(--faint);margin-top:6px}
+  .stat.good .v{color:var(--good)}
 
-  .flow { font: 12px ui-monospace, SFMono-Regular, Menlo, monospace;
-          color: var(--dim); margin-top: 7px; overflow-x: auto;
-          white-space: nowrap; padding-bottom: 2px; }
-  .meta { font-size: 12px; color: var(--dim); margin-top: 6px; }
-  .progress { height: 3px; background: var(--line); border-radius: 2px;
-              margin-top: 9px; overflow: hidden; }
-  .progress > i { display: block; height: 100%; background: var(--shadow); }
+  h2{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);
+    margin:0 0 12px;font-weight:600}
 
-  button { font: inherit; font-size: 12px; padding: 5px 12px; cursor: pointer;
-           border: 1px solid var(--line); border-radius: 4px;
-           background: var(--bg); color: var(--fg); }
-  button:hover:not(:disabled) { border-color: var(--accent); }
-  button:disabled { opacity: .4; cursor: default; }
+  .wf{background:var(--panel);border:1px solid var(--line);border-radius:9px;
+    margin-bottom:10px;overflow:hidden}
+  .wf-head{display:flex;justify-content:space-between;align-items:center;gap:14px;
+    padding:14px 17px;cursor:pointer}
+  .wf-head:hover{background:var(--bg)}
+  .wf-name{font-weight:600;letter-spacing:-.01em}
+  .wf-sub{font-size:12.5px;color:var(--dim);margin-top:3px}
+  .wf-right{display:flex;align-items:center;gap:14px;flex-shrink:0}
+  .calls{text-align:right}
+  .calls .n{font-size:17px;font-weight:600}
+  .calls .l{font-size:11px;color:var(--faint);text-transform:uppercase;
+    letter-spacing:.06em}
 
-  .note { font-size: 12px; margin-top: 9px; padding: 9px 11px; border-radius: 4px;
-          border: 1px solid var(--line); background: var(--bg); }
-  .note.bad { border-color: var(--revoked); }
-  .note.good { border-color: var(--sealed); }
-  .note code { font: 12px ui-monospace, monospace; }
-  .empty { color: var(--dim); font-size: 13px; padding: 18px 0; }
-  footer { margin-top: 44px; padding-top: 16px; border-top: 1px solid var(--line);
-           color: var(--dim); font-size: 12px; }
-  a { color: inherit; }
+  .pill{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
+    padding:3px 9px;border-radius:20px;border:1px solid currentColor;white-space:nowrap}
+  .pill.observing{color:var(--observing)} .pill.shadow{color:var(--shadow)}
+  .pill.sealed{color:var(--sealed)} .pill.revoked{color:var(--revoked)}
+
+  .wf-body{border-top:1px solid var(--line);padding:15px 17px;background:var(--bg)}
+  .steps{display:flex;flex-direction:column;gap:7px;margin:10px 0 14px}
+  .step{display:flex;gap:11px;align-items:flex-start;font-size:13px}
+  .step .i{width:20px;height:20px;border-radius:5px;border:1px solid var(--line);
+    display:grid;place-items:center;font-size:11px;color:var(--dim);flex-shrink:0;
+    background:var(--panel)}
+  .step .t{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px}
+  .step .b{color:var(--faint);font-size:12px;margin-top:1px}
+
+  .bar{height:4px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:9px}
+  .bar>i{display:block;height:100%;background:var(--shadow);transition:width .4s}
+
+  button{font:inherit;font-size:12.5px;font-weight:500;padding:6px 14px;cursor:pointer;
+    border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--fg)}
+  button:hover:not(:disabled){border-color:var(--accent)}
+  button:disabled{opacity:.45;cursor:default}
+  button.primary{background:var(--accent);color:var(--panel);border-color:var(--accent)}
+
+  .note{font-size:12.5px;margin-top:12px;padding:11px 13px;border-radius:7px;
+    border:1px solid var(--line);background:var(--panel)}
+  .note.bad{border-color:var(--bad)} .note.good{border-color:var(--good)}
+  .note b{display:block;margin-bottom:4px}
+  .note code{font-family:ui-monospace,monospace;font-size:12px;color:var(--dim);
+    display:block;margin-top:3px}
+
+  .empty{color:var(--dim);font-size:13px;padding:26px;text-align:center;
+    border:1px dashed var(--line);border-radius:9px}
+  footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);
+    color:var(--faint);font-size:12px;line-height:1.7}
 </style>
 
-<div class="wrap">
-  <header>
-    <h1>Quench</h1>
-    <div class="sub">Workflows earn their way out of the model loop &mdash; and lose it again on drift.</div>
-  </header>
+<div id="root"></div>
 
-  <div class="lifecycle" id="lifecycle"></div>
-  <div class="sub" style="font-size:12px">
-    Observing &rarr; Shadow (compares against the live agent, side effects discarded)
-    &rarr; Sealed (executes with no model). Drift demotes.
-  </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/htm/3.1.1/htm.module.js" type="module"></script>
 
-  <h2>Candidate workflows</h2>
-  <div id="candidates"><div class="empty">loading&hellip;</div></div>
+<script type="module">
+import htm from "https://cdnjs.cloudflare.com/ajax/libs/htm/3.1.1/htm.module.js";
+const { useState, useEffect, useCallback, createElement } = React;
+const html = htm.bind(createElement);
 
-  <h2>Sealed artifacts</h2>
-  <div id="ingots"><div class="empty">loading&hellip;</div></div>
-
-  <footer>
-    Sealing is a cache, not a promise. Every execution re-checks live inputs
-    against the sealed signature.
-    <span id="src"></span>
-  </footer>
-</div>
-
-<script>
-const $ = (id) => document.getElementById(id);
-const esc = (s) => String(s ?? "").replace(/[&<>"]/g, c =>
-  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-
-async function api(path, body) {
-  const opts = body
-    ? { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body) }
-    : {};
-  const res = await fetch(path, opts);
+const api = async (path, body) => {
+  const res = await fetch(path, body ? {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  } : {});
   return res.json();
+};
+const num = (n) => (n ?? 0).toLocaleString();
+
+// ---------------------------------------------------------------- Stat
+function Stat({ value, label, hint, good }) {
+  return html`
+    <div class=${"stat" + (good ? " good" : "")}>
+      <div class="v">${value}</div>
+      <div class="k">${label}</div>
+      ${hint && html`<div class="h">${hint}</div>`}
+    </div>`;
 }
 
-function lifecycle(summary) {
-  const order = ["observing", "shadow", "sealed", "revoked"];
-  $("lifecycle").innerHTML = order.map(s => `
-    <div class="stage ${s}">
-      <div class="n">${summary[s] ?? 0}</div>
-      <div class="l">${s}</div>
-    </div>`).join("");
+// ---------------------------------------------------------------- Steps
+function Steps({ tools, ingot }) {
+  const bindings = ingot?.steps || [];
+  return html`
+    <div class="steps">
+      ${tools.map((tool, i) => {
+        const edges = (bindings[i]?.bindings || [])
+          .map(b => `${b.field} from step ${b.from_step}`).join(", ");
+        return html`
+          <div class="step" key=${i}>
+            <div class="i">${i}</div>
+            <div>
+              <div class="t">${tool}</div>
+              ${edges && html`<div class="b">${edges}</div>`}
+            </div>
+          </div>`;
+      })}
+    </div>`;
 }
 
-function candidate(c) {
+// ------------------------------------------------------------ Workflow
+function Workflow({ row, onChanged }) {
+  const [open, setOpen] = useState(false);
+  const [result, setResult] = useState(null);
+  const [busy, setBusy] = useState(false);
+
+  const seal = async (e) => {
+    e.stopPropagation();
+    setBusy(true); setOpen(true);
+    setResult(await api("/api/seal", { index: row.index }));
+    setBusy(false);
+    setTimeout(onChanged, 500);
+  };
+
   const promoteAt = 10;
-  const pct = Math.min(100, (c.consecutive_matches / promoteAt) * 100);
-  const ready = c.eligible ? "" :
-    `<span class="meta">needs ${c.needs} more trace(s)</span>`;
-  return `
-    <div class="card" data-idx="${c.index}">
-      <div class="row">
-        <strong>${esc(c.label).slice(0, 72)}</strong>
-        <span class="badge ${c.state}">${c.state}</span>
+  const pct = Math.min(100, (row.consecutive_matches / promoteAt) * 100);
+
+  return html`
+    <div class="wf">
+      <div class="wf-head" onClick=${() => setOpen(!open)}>
+        <div>
+          <div class="wf-name">${row.name}</div>
+          <div class="wf-sub">
+            ${num(row.traces)} runs observed &middot; ${row.calls_per_run} model calls each
+            ${row.drift_events ? html` &middot; ${row.drift_events} drift` : null}
+          </div>
+        </div>
+        <div class="wf-right">
+          ${row.compilable && html`
+            <div class="calls">
+              <div class="n" style=${{ color: "var(--good)" }}>
+                ${row.state === "sealed" ? num(row.observed_calls) : num(row.observed_calls)}
+              </div>
+              <div class="l">${row.state === "sealed" ? "calls avoided" : "avoidable"}</div>
+            </div>`}
+          <span class=${"pill " + row.state}>${row.state}</span>
+        </div>
       </div>
-      <div class="flow">${c.tools.map(esc).join(" &rarr; ")}</div>
-      <div class="row">
-        <span class="meta">
-          ${c.traces} traces &middot; ${c.steps} steps ${ready}
-          ${c.drift_events ? `&middot; ${c.drift_events} drift` : ""}
-        </span>
-        ${c.state === "observing" && c.eligible
-          ? `<button onclick="seal(${c.index})">Verify &amp; seal</button>` : ""}
-      </div>
-      ${c.state === "shadow" ? `
-        <div class="meta">shadow: ${c.consecutive_matches}/${promoteAt} consecutive matches</div>
-        <div class="progress"><i style="width:${pct}%"></i></div>` : ""}
-      <div id="r${c.index}"></div>
+
+      ${open && html`
+        <div class="wf-body">
+          <${Steps} tools=${row.tools} ingot=${null} />
+
+          ${row.state === "shadow" && html`
+            <div>
+              <div class="wf-sub">
+                Shadow: running beside the live agent, side effects discarded.
+                ${row.consecutive_matches} of ${promoteAt} consecutive matches.
+              </div>
+              <div class="bar"><i style=${{ width: pct + "%" }}></i></div>
+            </div>`}
+
+          ${row.state === "observing" && html`
+            <div style=${{ display: "flex", gap: "10px", alignItems: "center" }}>
+              <button class="primary" disabled=${!row.eligible || busy} onClick=${seal}>
+                ${busy ? "Verifying…" : "Verify & compile"}
+              </button>
+              ${!row.eligible && html`
+                <span class="wf-sub">needs ${row.needs} more runs before it can be proven</span>`}
+            </div>`}
+
+          ${result && (result.sealed
+            ? html`<div class="note good">
+                <b>Compiled and signed.</b>
+                ${result.steps} steps, verified by ${(result.verified_by||[]).join(", ")}.
+                Now running in shadow beside the agent — it has to match
+                ${promoteAt} times before it answers on its own.
+              </div>`
+            : html`<div class="note bad">
+                <b>Cannot be compiled.</b>
+                ${(result.refusals||[]).map((r,i) => html`<code key=${i}>${r}</code>`)}
+              </div>`)}
+        </div>`}
     </div>`;
 }
 
-async function seal(index) {
-  const el = $("r" + index);
-  el.innerHTML = `<div class="note">verifying&hellip;</div>`;
-  const r = await api("/api/seal", { index });
-  if (r.sealed) {
-    el.innerHTML = `<div class="note good">
-      <strong>Sealed.</strong> ${esc(r.ingot_id)} &middot; ${r.steps} steps &middot;
-      verified by ${r.verified_by.map(esc).join(", ")}.<br>${esc(r.note)}</div>`;
-  } else {
-    el.innerHTML = `<div class="note bad">
-      <strong>Refused.</strong> ${(r.refusals || []).map(x =>
-        `<div><code>${esc(x)}</code></div>`).join("")}
-      ${r.passed?.length ? `<div class="meta">passed: ${r.passed.map(esc).join(", ")}</div>` : ""}
-      </div>`;
-  }
-  setTimeout(load, 600);
-}
+// ----------------------------------------------------------------- App
+function App() {
+  const [data, setData] = useState(null);
+  const load = useCallback(async () => setData(await api("/api/overview")), []);
+  useEffect(() => { load(); const t = setInterval(load, 15000); return () => clearInterval(t); }, [load]);
 
-function ingot(i) {
-  return `
-    <div class="card">
-      <div class="row">
-        <strong>${esc(i.ingot_id)}</strong>
-        <span class="badge ${i.revoked ? "revoked" : "sealed"}">
-          ${i.revoked ? "revoked" : "signed"}</span>
+  if (!data) return html`<div class="wrap"><div class="empty">Loading…</div></div>`;
+
+  const rows = data.rows || [];
+  const compilable = rows.filter(r => r.compilable);
+  const pct = data.observed_calls
+    ? Math.round((data.potential_calls / data.observed_calls) * 100) : 0;
+
+  return html`
+    <div class="wrap">
+      <header>
+        <div>
+          <h1>Quench</h1>
+          <div class="tag">Workflows that stopped needing a model — and what that saves.</div>
+        </div>
+        <div class="live"><span class="dot"></span> live</div>
+      </header>
+
+      <div class="stats">
+        <${Stat} value=${num(data.observed_calls)} label="Model calls observed"
+                 hint="across ${num(rows.reduce((a,r)=>a+r.traces,0))} runs" />
+        <${Stat} value=${num(data.potential_calls)} label="Avoidable" good=${true}
+                 hint="${pct}% of observed, on workflows that can be proven" />
+        <${Stat} value=${num(data.avoidable_calls)} label="Already avoided" good=${true}
+                 hint="${data.compiled} workflow${data.compiled===1?"":"s"} running compiled" />
+        <${Stat} value=${num(data.drift_events)} label="Drift events"
+                 hint=${data.drift_events ? "fell back to the agent" : "none — nothing has changed under us"} />
       </div>
-      <div class="flow">${(i.tools || []).map(esc).join(" &rarr; ")}</div>
-      <div class="meta">
-        ${i.steps} steps &middot; proven against ${i.trace_count ?? "?"} traces &middot;
-        ${(i.verified_by || []).map(esc).join(" + ")} &middot; ${esc(i.sealed_at)}
-      </div>
+
+      <h2>Workflows</h2>
+      ${rows.length
+        ? rows.map(r => html`<${Workflow} key=${r.skill_id} row=${r} onChanged=${load} />`)
+        : html`<div class="empty">
+            Nothing observed yet. Point an agent at this endpoint
+            (<code>OTEL_EXPORTER_OTLP_ENDPOINT</code>) and run a workflow a few times.
+          </div>`}
+
+      <footer>
+        A workflow is compiled only after it produces the same result as the live
+        agent, repeatedly. Every compiled run re-checks its inputs first, and hands
+        the work back to the agent the moment anything changes.<br/>
+        Sealing is a cache, not a promise.
+      </footer>
     </div>`;
 }
 
-async function load() {
-  const [cands, ings, st] = await Promise.all([
-    api("/api/candidates"), api("/api/ingots"), api("/api/state")
-  ]);
-  lifecycle(st.summary || {});
-  $("candidates").innerHTML = cands.length
-    ? cands.map(candidate).join("")
-    : `<div class="empty">Nothing observed yet. Run an agent workflow a few times.</div>`;
-  $("ingots").innerHTML = ings.length
-    ? ings.map(ingot).join("")
-    : `<div class="empty">No sealed artifacts yet.</div>`;
-}
-
-load();
-setInterval(load, 15000);
+ReactDOM.createRoot(document.getElementById("root")).render(html`<${App} />`);
 </script>
