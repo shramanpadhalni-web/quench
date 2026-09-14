@@ -147,12 +147,35 @@ Each is excellent at *"here's the workflow I already know I want."*
 | **Progressive Crystallization** (Microsoft Azure Networking, [arXiv 2607.07052](https://arxiv.org/abs/2607.07052)) | Extracts successful behaviour from traces, promotes on evidence (≥10 runs, ≥90% identical action sequence, zero safety violations), demotes automatically on drift. **>70% cost reduction in production; 0→45% deterministic over eight months.** | Internal Azure infrastructure for one domain. No portable artifact, no signing or provenance, no cross-runtime capture. Its promotion test checks *control flow only* — see §8. |
 | **LOOP Skill Engine** ([arXiv 2605.14237](https://arxiv.org/abs/2605.14237)) | Records a tool trajectory on first run, extracts a parameterised branch-free template, replays with the LLM bypassed. **93.3–99.98% token reduction, 8.7× faster.** | **One-shot** — record once, replay thereafter. Quench requires convergence across N traces, a purity check, and a Shadow Mode record against the live agent. One-shot cannot distinguish a stable workflow from one you happened to see once. |
 
+### Where the interoperability protocols sit
+
+A2A, MCP and the Microsoft Agent Framework come up in every architecture
+conversation, and they are **not in this comparison at all**. They coordinate
+*between* agents — discovery, delegation, multi-agent orchestration. Quench
+works *below* one agent, on a single behaviour at a time.
+
+A mesh built on A2A still pays full price for every repeated workflow inside
+each agent. That is what Quench removes. It sits underneath an interoperability
+layer, never instead of one — and saying so first avoids a comparison against
+150+ organisations that nobody wins.
+
 ### The honest framing
 
 Someone has already proven this works in production, at scale, with numbers
 better than any we can currently show. **That is an asset.** It means the
 category is validated and the argument shifts from *"will this work?"* to
 *"whose implementation do you want?"*
+
+And the underlying preference is not ours either. Anthropic's own guidance tells
+developers to prefer *workflows* — predefined code paths — over *agents* that
+decide at runtime, wherever a task permits it. What that advice leaves open is
+how you know which tasks permit it.
+
+> **Anthropic tells developers to prefer workflows over agents. Quench is a
+> compiler that promotes a verified agent into a workflow.**
+
+That is the shortest true description of this project, and it borrows authority
+rather than asking for it.
 
 Ours is the one that produces a **portable, signed, policy-verified artifact**
 any runtime can create and any team can inspect, revoke or share.
