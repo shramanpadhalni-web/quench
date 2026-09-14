@@ -13,7 +13,6 @@ live agent automatically.
 
 Observation-first promotion is *not* ours alone — Microsoft's Progressive
 Crystallization and the LOOP Skill Engine both do it. See
-[`docs/COMPETITIVE-LANDSCAPE.md`](docs/COMPETITIVE-LANDSCAPE.md) before making
 any public claim. The artifact format, the compile-time policy gate, and
 output-purity verification are the parts that are ours.
 
